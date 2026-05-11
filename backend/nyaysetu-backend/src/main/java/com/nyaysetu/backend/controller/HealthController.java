@@ -25,7 +25,7 @@ public class HealthController {
                 "status", "UP",
                 "service", "nyaysetu-backend",
                 "uptime", String.format("%dh %dm %ds", uptime.toHours(), uptime.toMinutesPart(), uptime.toSecondsPart()),
-                    "version", version,
+                "version", version,
                 "java", javaVersion
         ));
     }
