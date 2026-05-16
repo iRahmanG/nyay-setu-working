@@ -410,7 +410,6 @@ async def deep_research_pipeline(query: str, language: str):
         # Call the AI model and stream reasoning
         ai_answer = None
         cached = False
-
         if model_choice == "gemini" and gemini_client:
             cache_key = generate_cache_key(
                 "gemini",
