@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
 gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
-# Module-level circuit-breakers for persistant state across requests
+# Module-level circuit-breakers for persistent state across requests
 groq_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 gemini_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
@@ -51,6 +51,7 @@ def _build_user_prompt(question: str, kanoon_context: str | None) -> str:
         "If the answer is not present in the context, say you cannot verify it."
     )
 
+
 def _fallback_response(question: str, source: str) -> dict:
     """Structured fallback response when all retries are exhausted or circuit is open."""
     return {
@@ -61,9 +62,10 @@ def _fallback_response(question: str, source: str) -> dict:
         "is_fallback": True
     }
 
+
 @retry_transient
-async def _call_groq_with_retry(question: str , kanoon_context: str | None = None) -> dict:
-    """Helper to call Groq LPU with retry logic"""
+async def _call_groq_with_retry(question: str, kanoon_context: str | None = None) -> dict:
+    """Helper to call Groq LPU with retry logic."""
     user_prompt = _build_user_prompt(question, kanoon_context)
     response = await groq_client.chat.completions.create(
         model=GROQ_MODEL_FAST,
@@ -81,9 +83,10 @@ async def _call_groq_with_retry(question: str , kanoon_context: str | None = Non
         "error": None
     }
 
+
 @retry_transient
 async def _call_gemini_with_retry(question: str, kanoon_context: str | None = None) -> dict:
-    """Call Gemini with a complex legal sub-question via asyncio. With retry logic"""
+    """Helper to call Gemini with retry logic."""
     user_prompt = _build_user_prompt(question, kanoon_context)
     full_prompt = (
         f"{LEGAL_SYSTEM_PROMPT}\n\n"
@@ -102,94 +105,43 @@ async def _call_gemini_with_retry(question: str, kanoon_context: str | None = No
             }
         )
     )
-    answer = response.text.strip()
     return {
         "question": question,
-        "answer": answer,
+        "answer": response.text.strip(),
         "source": "gemini",
         "error": None
     }
 
+
 async def call_groq_async(question: str, kanoon_context: str | None = None) -> dict:
-<<<<<<< HEAD
-    """Call Groq LPU with a legal sub-question."""
-    try:
-        user_prompt = _build_user_prompt(question, kanoon_context)
-        response = await groq_client.chat.completions.create(
-            model=GROQ_MODEL_FAST,
-            messages=[
-                {"role": "system", "content": f"{LEGAL_SYSTEM_PROMPT}\n\n{KANOON_CONTEXT_PROMPT}"},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.2,
-            max_tokens=800
-        )
-        answer = response.choices[0].message.content.strip()
-        return {
-            "question": question,
-            "answer": answer,
-            "source": "groq",
-            "cached": False,
-            "error": None
-        }
-=======
-    """Call Groq LPU with circuit breaker + retry logic"""
+    """Call Groq LPU with circuit breaker + retry logic."""
     if not groq_breaker.is_available():
-        logger.warning(f"[CircuitBreaker/Groq] OPEN - fast failing")
+        logger.warning("[CircuitBreaker/Groq] OPEN - fast failing")
         return _fallback_response(question, "groq")
-    try :
+    try:
         result = await _call_groq_with_retry(question, kanoon_context)
         groq_breaker.call_succeeded()
         return result
->>>>>>> 1093ad62 (updated research.py with circuit breaker and retry logic)
     except Exception as e:
         groq_breaker.call_failed()
         logger.error(f"[Research/Groq] Failed after retries: {e}")
         return _fallback_response(question, "groq")
-    
-        
+
+
 async def call_gemini_async(question: str, kanoon_context: str | None = None) -> dict:
-    """Call Gemini with a complex legal sub-question via asyncio with Circuit Breaker"""
+    """Call Gemini with circuit breaker + retry logic, falls back to Groq."""
     if not gemini_client:
-        # Fallback to Groq if Gemini key not set
         return await call_groq_async(question, kanoon_context)
     if not gemini_breaker.is_available():
         logger.warning("[CircuitBreaker/Gemini] OPEN — falling back to Groq")
         return await call_groq_async(question, kanoon_context)
     try:
-<<<<<<< HEAD
-        user_prompt = _build_user_prompt(question, kanoon_context)
-        full_prompt = (
-            f"{LEGAL_SYSTEM_PROMPT}\n\n"
-            f"{KANOON_CONTEXT_PROMPT}\n\n"
-            f"Question: {user_prompt}"
-        )
-        # Run synchronous Gemini call in executor to not block event loop
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: gemini_client.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=full_prompt
-            )
-        )
-        answer = response.text.strip()
-        return {
-            "question": question,
-            "answer": answer,
-            "source": "gemini",
-            "cached": False,
-            "error": None
-        }
-=======
-        answer = await _call_gemini_with_retry(question, kanoon_context)
+        result = await _call_gemini_with_retry(question, kanoon_context)
         gemini_breaker.call_succeeded()
-        return answer
->>>>>>> 1093ad62 (updated research.py with circuit breaker and retry logic)
+        return result
     except Exception as e:
         gemini_breaker.call_failed()
         logger.error(f"[Research/Gemini] Failed after retries: {e}")
-        # Fallback to Groq before giving up entirely
         return await call_groq_async(question, kanoon_context)
 
 
@@ -211,6 +163,5 @@ async def run_parallel_research(
         else:
             tasks.append(call_groq_async(question, kanoon_context))
 
-    # All tasks fire simultaneously
     results = await asyncio.gather(*tasks, return_exceptions=False)
     return list(results)
