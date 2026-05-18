@@ -12,6 +12,10 @@ from tenacity import (
     before_sleep_log
 )
 
+# for async retry
+from functools import wraps
+import asyncio
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,6 +39,7 @@ def async_retry(max_attempts: int = 3, delay: float = 1.0):
                     attempt += 1
         return wrapper
     return decorator
+
 # Retry Decorator 
 retry_transient = retry(
     stop=stop_after_attempt(3),
