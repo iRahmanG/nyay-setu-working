@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
+import ScrollTopButton from '../components/landing/ScrollTopButton';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 
@@ -114,8 +115,8 @@ export default function About() {
             <section style={{
                 padding: '10rem 2rem 6rem',
                 textAlign: 'center',
-                background: '#FFFFFF',
-                borderBottom: '1px solid #E5E7EB'
+                background: 'var(--bg-surface)',
+                borderBottom: '1px solid var(--border-light)'
             }}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -142,14 +143,14 @@ export default function About() {
                     <h1 style={{
                         fontSize: 'clamp(2.5rem, 5vw, 3.75rem)',
                         fontWeight: '800',
-                        color: 'var(--color-primary)',
+                        color: 'var(--text-main)',
                         marginBottom: '1.5rem',
                         lineHeight: '1.2',
                         letterSpacing: '-0.02em'
                     }}>
                         {t('about:heroTitleStart')}{' '}
                         <span style={{
-                            background: 'linear-gradient(135deg, #3F5DCC, #7C5CFF)',
+                            background:'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text'
@@ -187,12 +188,12 @@ export default function About() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         style={{
-                            background: '#FFFFFF',
-                            border: '1px solid #E5E7EB',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             borderRadius: '2rem',
                             padding: '3rem',
                             textAlign: 'center',
-                            boxShadow: '0 4px 20px rgba(30, 42, 68, 0.05)',
+                            boxShadow: 'var(--shadow-glass)',
                             position: 'relative'
                         }}
                     >
@@ -247,7 +248,7 @@ export default function About() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    border: '3px solid white',
+                                    border: '3px solid var(--bg-surface)',
                                     opacity: '0',
                                     transition: 'opacity 0.3s'
                                 }}
@@ -374,7 +375,7 @@ export default function About() {
             </section>
 
             {/* Development Roadmap */}
-            <section style={{ padding: '6rem 2rem', background: '#FFFFFF', borderTop: '1px solid #E5E7EB', borderBottom: '1px solid #E5E7EB' }}>
+            <section style={{ padding: '6rem 2rem', background: 'var(--bg-surface)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -527,10 +528,10 @@ export default function About() {
                         maxWidth: '750px',
                         margin: '0 auto',
                         padding: '5rem 3rem',
-                        background: '#FFFFFF',
-                        border: '1px solid #E5E7EB',
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-light)',
                         borderRadius: '2rem',
-                        boxShadow: '0 10px 40px rgba(30, 42, 68, 0.04)'
+                        boxShadow: 'var(--shadow-glass)'
                     }}
                 >
                     <h2 style={{
@@ -565,6 +566,7 @@ export default function About() {
                 </motion.div>
             </section>
 
+            <ScrollTopButton className="scroll-top-bottom-low" />
             <Footer />
         </div>
     );

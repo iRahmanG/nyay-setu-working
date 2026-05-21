@@ -79,9 +79,14 @@
     "reviewApprovePetition": "Review & Approve Petition",
     "approveAndESign": "Approve & E-Sign",
     "requestChanges": "Request Changes",
+    
 
+    "aiDraftDescription": "Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.",
+    "lawyerDraftDescription": "Your lawyer has submitted a draft petition. Please review and approve it to trigger the \"Submit to Court\" action for your lawyer.",
     "confirmApproveDraft": "Are you sure you want to approve this draft? This will notify your lawyer.",
     "draftApproved": "Draft Approved! Your lawyer can now submit to court.",
+    "failedApproveDraft": "Failed to approve draft. Please try again.",
+    "approveESign": "Approve & E-Sign",
 
     "aiDraftGenerated": "Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.",
     "reviewLawyerDraft": "Your lawyer has submitted a draft petition. Please review and approve it to trigger the Submit to Court action.",
@@ -450,7 +455,8 @@
     "sendMessageError": "Failed to send message.",
     "fetchCasesError": "Failed to load cases.",
     "fetchMessagesError": "Failed to load messages.",
-    "aiHelpError": "Failed to generate AI help."
+    "aiHelpError": "Failed to generate AI help.",
+    "findLawyer": "🔍 Find a Lawyer"
   },
 
   "profile": {

@@ -1,71 +1,31 @@
 import { Trophy, Award, Sparkles, FileText, Presentation, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export default function AchievementsSection() {
-    // const { language } = useLanguage();
     const { t } = useTranslation('landing');
     const [hoveredCard, setHoveredCard] = useState(null);
 
-    // const achievements = language === 'en' ? [
-    //     {
-    //         title: "VOIS Finale",
-    //         subtitle: "Top 50 Finalist",
-    //         badge: "Ongoing",
-    //         description: "Selected among the top 50 finalists in the VOIS for Tech Innovation Marathon 2.0, a prestigious national competition demonstrating excellence in legal technology innovation.",
-    //         icon: <Trophy size={40} />,
-    //         color: '#FFD700',
-    //         bgGradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-    //     },
-    //     {
-    //         title: "e-Submit Pune Zonal",
-    //         subtitle: "Secured Rank 2",
-    //         description: "Achieved 2nd rank in the e-Submit Pune Zonal competition and won a cash prize, recognized for innovative solutions in digital legal services.",
-    //         icon: <Award size={40} />,
-    //         color: '#C0C0C0',
-    //         bgGradient: 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)'
-    //     }
-    // ] : [
-    //     {
-    //         title: "VOIS फाइनल",
-    //         subtitle: "शीर्ष 50 फाइनलिस्ट",
-    //         badge: "जारी",
-    //         description: "VOIS for Tech Innovation Marathon 2.0 में शीर्ष 50 फाइनलिस्टों में चयनित, एक प्रतिष्ठित राष्ट्रीय प्रतियोगिता जो कानूनी प्रौद्योगिकी नवाचार में उत्कृष्टता का प्रदर्शन करती है।",
-    //         icon: <Trophy size={40} />,
-    //         color: '#FFD700',
-    //         bgGradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-    //     },
-    //     {
-    //         title: "e-Submit पुणे ज़ोनल",
-    //         subtitle: "रैंक 2 हासिल की",
-    //         description: "e-Submit पुणे ज़ोनल प्रतियोगिता में दूसरी रैंक हासिल की और नकद पुरस्कार जीता, डिजिटल कानूनी सेवाओं में नवीन समाधानों के लिए मान्यता प्राप्त।",
-    //         icon: <Award size={40} />,
-    //         color: '#C0C0C0',
-    //         bgGradient: 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)'
-    //     }
-    // ];
-
     const achievements = [
-    {
-        title: t('landing:achievements.vois.title'),
-        subtitle: t('landing:achievements.vois.subtitle'),
-        badge: t('landing:achievements.vois.badge'),
-        description: t('landing:achievements.vois.description'),
-        icon: <Trophy size={40} />,
-        color: '#FFD700',
-        bgGradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-    },
-
-    {
-        title: t('landing:achievements.esubmit.title'),
-        subtitle: t('landing:achievements.esubmit.subtitle'),
-        description: t('landing:achievements.esubmit.description'),
-        icon: <Award size={40} />,
-        color: '#C0C0C0',
-        bgGradient: 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)'
-    }
+        {
+            title: t('achievements.vois.title'),
+            subtitle: t('achievements.vois.subtitle'),
+            badge: t('achievements.vois.badge'),
+            description: t('achievements.vois.description'),
+            icon: <Trophy size={40} />,
+            color: '#FFD700',
+            bgGradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+        },
+        {
+            title: t('achievements.esubmit.title'),
+            subtitle: t('achievements.esubmit.subtitle'),
+            description: t('achievements.esubmit.description'),
+            icon: <Award size={40} />,
+            color: '#C0C0C0',
+            bgGradient: 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)'
+        }
     ];
 
     return (
@@ -85,7 +45,7 @@ export default function AchievementsSection() {
                     }}>
                         <Sparkles size={24} style={{ color: 'var(--color-secondary)' }} />
                         <span style={{ color: 'var(--color-secondary)', fontSize: '0.95rem', fontWeight: '700' }}>
-                            {t('landing:achievements.headerBadge')}
+                            {t('achievements.badge')}
                         </span>
                     </div>
 
@@ -95,18 +55,18 @@ export default function AchievementsSection() {
                         color: 'var(--text-main)',
                         marginBottom: '1rem'
                     }}>
-                        {t('landing:achievements.title')}
+                        {t('achievements.heading')}
                         <span style={{
                             background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            {t('landing:achievements.titleHighlight')}
+                            {t('achievements.headingHighlight')}
                         </span>
                     </h2>
 
                     <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-                        {t('landing:achievements.subtitle')}
+                        {t('achievements.subheading')}
                     </p>
                 </div>
 
@@ -196,10 +156,9 @@ export default function AchievementsSection() {
                                             marginBottom: '1rem',
                                             textAlign: 'center'
                                         }}>
-                                            {t('landing:achievements.viewSubmission')}
+                                            {t('achievements.overlay.viewMaterials')}
                                         </h4>
 
-                                        {/* Report Button */}
                                         <motion.a
                                             href="/VOIS_Submission/VOIS_Final_Report_NyaySetu.pdf"
                                             target="_blank"
@@ -226,10 +185,9 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <FileText size={22} />
-                                            {t('landing:achievements.viewReport')}
+                                            {t('achievements.overlay.viewReport')}
                                         </motion.a>
 
-                                        {/* Presentation Button */}
                                         <motion.a
                                             href="/VOIS_Submission/Nyay_Setu_VOIS_Presentation_PDF.pdf"
                                             target="_blank"
@@ -256,10 +214,9 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <Presentation size={22} />
-                                            {t('landing:achievements.viewPresentation')}
+                                            {t('achievements.overlay.viewPresentation')}
                                         </motion.a>
 
-                                        {/* Video Button */}
                                         <motion.a
                                             href="/VOIS_Submission/NyaySetu_VOIS.mp4"
                                             target="_blank"
@@ -286,7 +243,7 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <Video size={22} />
-                                            {t('landing:achievements.watchVideo')}
+                                            {t('achievements.overlay.watchVideo')}
                                         </motion.a>
                                     </motion.div>
                                 )}
@@ -322,10 +279,9 @@ export default function AchievementsSection() {
                                             textAlign: 'center',
                                             margin: 0
                                         }}>
-                                            {t('landing:achievements.certificateTitle')}
+                                            {t('achievements.overlay.certificateTitle')}
                                         </h4>
 
-                                        {/* Certificate Image */}
                                         <motion.a
                                             href="/esubmit_certificate.png"
                                             target="_blank"
@@ -369,7 +325,7 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <Award size={20} />
-                                            {t('landing:achievements.viewCertificate')}
+                                            {t('achievements.overlay.viewCertificate')}
                                         </motion.a>
                                     </motion.div>
                                 )}
@@ -394,7 +350,6 @@ export default function AchievementsSection() {
 
                             {/* Content */}
                             <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                {/* Title */}
                                 <h3 style={{
                                     color: 'var(--text-main)',
                                     fontSize: '1.75rem',
@@ -405,7 +360,6 @@ export default function AchievementsSection() {
                                     {achievement.title}
                                 </h3>
 
-                                {/* Subtitle and Badge */}
                                 <div style={{
                                     display: 'flex',
                                     gap: '0.75rem',
@@ -425,7 +379,6 @@ export default function AchievementsSection() {
                                         {achievement.subtitle}
                                     </div>
 
-                                    {/* Ongoing Badge (only for VOIS) */}
                                     {achievement.badge && (
                                         <div style={{
                                             display: 'inline-block',
@@ -442,7 +395,6 @@ export default function AchievementsSection() {
                                     )}
                                 </div>
 
-                                {/* Description */}
                                 <p style={{
                                     color: 'var(--text-secondary)',
                                     fontSize: '1.1rem',

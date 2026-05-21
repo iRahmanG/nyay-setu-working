@@ -8,6 +8,7 @@
   "placeholder": "Ask me anything about Indian law...",
   "error": "Sorry, I encountered an error. Please try again.",
   "askQuestion": "Ask any legal question",
+  "poweredBy": "Powered by NyaySetu AI",
   "sampleQuestions": [
     "What are my fundamental rights?",
     "How do I file a case online?",

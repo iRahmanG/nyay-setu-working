@@ -8,7 +8,7 @@ Endpoints:
   POST /api/legal/analyze           — Sync version (testing only)
   GET  /health                      — Health check
 """
-
+from utils import async_retry
 import asyncio
 import json
 import logging
@@ -20,6 +20,11 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
+from cache import (
+    generate_cache_key,
+    get_cached_response,
+    set_cached_response
+)
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
@@ -28,6 +33,7 @@ from synthesizer import synthesize_answers
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
 from routers.forensics import router as forensics_router
+from routers.modi_ocr import router as modi_ocr_router
 
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
@@ -64,6 +70,7 @@ app.add_middleware(
 )
 
 app.include_router(forensics_router)
+app.include_router(modi_ocr_router)
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -191,6 +198,18 @@ async def legal_reasoning_pipeline(query: str, language: str):
 async def health():
     return {"status": "ok", "service": "nlp-orchestrator", "port": 8001}
 
+@app.get("/models")
+async def get_models():
+    return {
+        "groq": {
+            "model": GROQ_MODEL_FAST,
+            "available": bool(GROQ_API_KEY)
+        },
+        "gemini": {
+            "model": GEMINI_MODEL,
+            "available": bool(GEMINI_API_KEY)
+        }
+    }
 
 @app.post("/api/legal/analyze-stream")
 async def analyze_stream(body: LegalQuery, request: Request):
@@ -272,6 +291,21 @@ Structure your response with:
 5. Important caveats or disclaimers
 
 Format in Markdown. Be precise and cite sources."""
+
+@async_retry(max_attempts=3)
+async def call_groq_with_retry(grounded_prompt, query):
+
+    response = await groq_client.chat.completions.create(
+        model=GROQ_MODEL_FAST,
+        messages=[
+            {"role": "system", "content": grounded_prompt},
+            {"role": "user", "content": query}
+        ],
+        temperature=0.2,
+        max_tokens=2048
+    )
+
+    return response
 
 
 async def deep_research_pipeline(query: str, language: str):
@@ -387,33 +421,78 @@ async def deep_research_pipeline(query: str, language: str):
 
         # Call the AI model and stream reasoning
         ai_answer = None
+        cached = False
         if model_choice == "gemini" and gemini_client:
-            try:
-                loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: gemini_client.models.generate_content(
-                        model=GEMINI_MODEL,
-                        contents=grounded_prompt
-                    )
-                )
-                ai_answer = response.text.strip()
-            except Exception as e:
-                logger.error(f"Gemini failed, falling back to Groq: {e}")
-                model_choice = "groq"
-                ai_answer = None
-        
-        if model_choice == "groq" or (model_choice == "gemini" and not gemini_client):
-            response = await groq_client.chat.completions.create(
-                model=GROQ_MODEL_FAST,
-                messages=[
-                    {"role": "system", "content": grounded_prompt},
-                    {"role": "user", "content": query}
-                ],
-                temperature=0.2,
-                max_tokens=2048
+            cache_key = generate_cache_key(
+                "gemini",
+                grounded_prompt,
+                GEMINI_MODEL,
+                user_query=query
             )
-            ai_answer = response.choices[0].message.content.strip()
+
+            cached_response = get_cached_response(cache_key)
+
+            if cached_response:
+                logger.info("[Deep Research] Gemini cache hit")
+                ai_answer = cached_response
+                cached = True
+
+            else:
+                try:
+                    loop = asyncio.get_event_loop()
+
+                    response = await loop.run_in_executor(
+                        None,
+                        lambda: gemini_client.models.generate_content(
+                            model=GEMINI_MODEL,
+                            contents=grounded_prompt
+                        )
+                    )
+
+                    ai_answer = response.text.strip()
+
+                    set_cached_response(cache_key, ai_answer)
+
+                except Exception as e:
+                    logger.error(f"Gemini failed, falling back to Groq: {e}")
+
+                    model_choice = "groq"
+
+
+        if model_choice == "groq" or (
+            model_choice == "gemini" and not gemini_client
+        ):
+
+            cache_key = generate_cache_key(
+                "groq",
+                grounded_prompt,
+                GROQ_MODEL_FAST,
+                user_query=query
+            )
+
+            cached_response = get_cached_response(cache_key)
+
+            if cached_response and not cached:
+                logger.info("[Deep Research] Groq cache hit")
+
+                ai_answer = cached_response
+                cached = True
+
+            else:
+                response = await groq_client.chat.completions.create(
+                    model=GROQ_MODEL_FAST,
+                    messages=[
+                        {"role": "system", "content": grounded_prompt},
+                        {"role": "user", "content": query}
+                    ],
+                    temperature=0.2,
+                    max_tokens=2048
+                )
+
+                ai_answer = response.choices[0].message.content.strip()
+
+                if not cached:
+                    set_cached_response(cache_key, ai_answer)
 
         # Stream reasoning text in chunks for live display
         if ai_answer:

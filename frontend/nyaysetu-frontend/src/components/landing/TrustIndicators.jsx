@@ -1,47 +1,45 @@
 import { motion } from 'framer-motion';
 import { Shield, Award, Users, TrendingUp, Clock, Lock } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 
 export default function TrustIndicators() {
-    // const { language } = useLanguage();
     const { t } = useTranslation('landing');
 
     const indicators = [
         {
             icon: Shield,
-            title : t('landing:trustIndicators.security.title'),
-            description: t('landing:trustIndicators.security.description'),
+            title: t('trustIndicators.bankSecurity.title'),
+            description: t('trustIndicators.bankSecurity.description'),
             color: "#8b5cf6"
         },
         {
             icon: Award,
-            title: t('landing:trustIndicators.certified.title'),
-            description: t('landing:trustIndicators.certified.description'),
+            title: t('trustIndicators.govCertified.title'),
+            description: t('trustIndicators.govCertified.description'),
             color: "#10b981"
         },
         {
             icon: Users,
-            title: t('landing:trustIndicators.users.title'),
-            description: t('landing:trustIndicators.users.description'),
+            title: t('trustIndicators.activeUsers.title'),
+            description: t('trustIndicators.activeUsers.description'),
             color: "#6366f1"
         },
         {
             icon: TrendingUp,
-            title: t('landing:trustIndicators.success.title'),
-            description: t('landing:trustIndicators.success.description'),
+            title: t('trustIndicators.successRate.title'),
+            description: t('trustIndicators.successRate.description'),
             color: "#ec4899"
         },
         {
             icon: Clock,
-            title: t('landing:trustIndicators.availability.title'),
-            description: t('landing:trustIndicators.availability.description'),
+            title: t('trustIndicators.availability.title'),
+            description: t('trustIndicators.availability.description'),
             color: "#f59e0b"
         },
         {
             icon: Lock,
-            title: t('landing:trustIndicators.privacy.title'),
-            description: t('landing:trustIndicators.privacy.description'),
+            title: t('trustIndicators.dataPrivacy.title'),
+            description: t('trustIndicators.dataPrivacy.description'),
             color: "#3b82f6"
         }
     ];
@@ -49,7 +47,7 @@ export default function TrustIndicators() {
     return (
         <section style={{
             padding: '5rem 2rem',
-            background: 'var(--bg-glass-strong)', // Use variable
+            background: 'var(--bg-glass-strong)',
             backdropFilter: 'var(--glass-blur)',
             borderTop: 'var(--border-glass)',
             borderBottom: 'var(--border-glass)'
@@ -78,11 +76,11 @@ export default function TrustIndicators() {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            {t('landing:trustIndicators.title')}
+                            {t('trustIndicators.heading')}
                         </span>
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
-                        {t('landing:trustIndicators.subtitle')}
+                        {t('trustIndicators.subheading')}
                     </p>
                 </motion.div>
 
@@ -92,7 +90,7 @@ export default function TrustIndicators() {
                     style={{
                         maxWidth: '100%',
                         overflow: 'hidden',
-                        padding: '1rem 0', // Extra vertical padding for hover effects
+                        padding: '1rem 0',
                         maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
                         WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
                     }}
@@ -103,13 +101,12 @@ export default function TrustIndicators() {
                             display: 'flex',
                             gap: '2rem',
                             width: 'max-content',
-                            padding: '1rem 0' // Internal padding to prevent border clipping
+                            padding: '1rem 0'
                         }}
                     >
-                        {/* Duplicate lists for seamless loop */}
                         {[...indicators, ...indicators].map((item, idx) => (
                             <motion.div
-                                key={`${idx}-${item.title}`} // Unique key using index and title
+                                key={`${idx}-${item.title}`}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
@@ -117,10 +114,10 @@ export default function TrustIndicators() {
                                 whileHover={{ y: -10, transition: { duration: 0.3 } }}
                                 style={{
                                     padding: '4rem 3rem',
-                                    background: 'rgba(255, 255, 255, 0.4)', // Light glass
-                                    backdropFilter: 'blur(10px)',
+                                    background: 'var(--bg-glass)',
+                                    backdropFilter: 'var(--glass-blur)',
                                     borderRadius: '24px',
-                                    border: 'var(--border-glass)',
+                                    border: '1px solid var(--border-light)',
                                     textAlign: 'center',
                                     cursor: 'pointer',
                                     boxShadow: 'var(--shadow-glass)',
@@ -129,17 +126,18 @@ export default function TrustIndicators() {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.borderColor = item.color;
                                     e.currentTarget.style.boxShadow = `0 15px 40px ${item.color}20`;
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)';
+                                    e.currentTarget.style.background = 'var(--bg-glass-strong)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                                    e.currentTarget.style.borderColor = 'var(--border-light)';
                                     e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)';
+                                    e.currentTarget.style.background = 'var(--bg-glass)';
                                 }}
                             >
                                 {/* Icon */}
@@ -195,4 +193,3 @@ export default function TrustIndicators() {
         </section>
     );
 }
-
