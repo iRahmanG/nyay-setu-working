@@ -32,19 +32,22 @@ class NotificationService {
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = new URL(this.API_BASE_URL).host;
-
-            // REMOVED: ?token=${token} is gone from the URL string
+            
+            // Secure URL without query parameters
             const wsUrl = `${protocol}//${host}/api/ws/notifications`;
 
             this.isConnecting = true;
 
+            // Merged environment log routing rules
             if (!isProduction) {
-                console.log('Connecting to notification WebSocket...');
+                if (import.meta.env.DEV) {
+                    console.log('Connecting to notification WebSocket...');
+                }
             }
 
             this.ws = new WebSocket(wsUrl);
 
-            // Handshake established - immediately pass token down the channel
+            // In-band Authentication frame payload dispatch
             this.ws.onopen = () => {
                 this.ws.send(JSON.stringify({
                     type: 'AUTH',
@@ -58,7 +61,9 @@ class NotificationService {
 
                     if (message.type === 'AUTH_SUCCESS') {
                         if (!isProduction) {
-                            console.log('✅ Notification WebSocket authenticated');
+                            if (import.meta.env.DEV) {
+                                console.log('✅ Notification WebSocket authenticated');
+                            }
                         }
                         this.reconnectAttempts = 0;
                         this.isConnecting = false;
@@ -74,16 +79,16 @@ class NotificationService {
                     }
 
                     if (message.type === 'NOTIFICATION') {
-                        // Extract payload specifically mapped by your backend listener
                         this.notifyListeners(message.payload);
                         return;
                     }
 
-                    // Fallback wrapper
                     this.notifyListeners(message);
                 } catch (error) {
                     if (!isProduction) {
-                        console.warn('Invalid notification WebSocket message format received');
+                        if (import.meta.env.DEV) {
+                            console.warn('Invalid notification WebSocket message format received');
+                        }
                     }
                 }
             };
@@ -95,8 +100,8 @@ class NotificationService {
             this.ws.onclose = (event) => {
                 this.isConnecting = false;
                 this.ws = null;
-
-                // Code 1008 means the backend closed due to authentication failure
+                
+                // Code 1008 means server sandbox kicked the connection due to auth timeout/failure
                 if (event.code === 1008) {
                     this.connectionFailed = true;
                     return;
@@ -140,7 +145,7 @@ class NotificationService {
             try {
                 callback(notification);
             } catch (error) {
-                // Silent fail to avoid crashing the service if a component breaks
+                // Silent catch to keep listener loops active
             }
         });
     }
@@ -177,7 +182,7 @@ class NotificationService {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {
-            // Silent fail
+            // Suppress error responses
         }
     }
 }
