@@ -11,13 +11,6 @@ import jakarta.annotation.PostConstruct;
 import java.nio.file.Path;
 import java.util.Map;
 
-/**
- * RAG (Retrieval-Augmented Generation) Service
- *
- * Delegates embedding and retrieval to the external LawGPT Python service
- * instead of loading a ~90MB ONNX model in-process. This avoids OOM in
- * memory-constrained Docker environments (768M container / 512m JVM heap).
- */
 @Service
 @Slf4j
 public class RagService {
