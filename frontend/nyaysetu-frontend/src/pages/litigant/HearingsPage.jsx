@@ -1,4 +1,4 @@
-import { scheduleHearingReminder } from '../../utils/hearingReminder';
+import { scheduleHearingReminder } from '../../utils/HearingReminder';
 import { useState, useEffect } from 'react';
 import {
     Video,
