@@ -1,8 +1,27 @@
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import LiveHearing from './LiveHearing';
+import React from 'react';
+
+vi.mock('../../services/api', () => ({
+    judgeAPI: {
+        getTodaysHearings: vi.fn(() => Promise.resolve({
+            data: [
+                {
+                    id: 'hearing-1',
+                    scheduledDate: new Date().toISOString(), // Keeps it active for today
+                    durationMinutes: 60,
+                    caseEntity: {
+                        id: 'case-123456789',
+                        title: 'Test Live Case'
+                    }
+                }
+            ]
+        }))
+    }
+}));
 
 // Helper to render component wrapped inside Router context
 const renderComponent = () => {
@@ -18,7 +37,7 @@ describe('LiveHearing Accessibility Verification', () => {
         renderComponent();
 
         // 1. Verify main dashboard heading is discoverable by screen readers
-        const mainHeading = screen.getByRole('heading', { name: /live hearings/i });
+        const mainHeading = await screen.findByRole('heading', { name: /live hearings/i });
         expect(mainHeading).toBeInTheDocument();
 
         // 2. Verify search input has accessible layout text context
@@ -26,11 +45,11 @@ describe('LiveHearing Accessibility Verification', () => {
         expect(searchInput).toBeInTheDocument();
     });
 
-    test('Active hearing workspace contains accessible navigation controls', () => {
+    test('Active hearing workspace contains accessible navigation controls', async () => {
         renderComponent();
 
         // Click the "Join Now" button to switch to the active hearing viewport layout
-        const joinButton = screen.getByRole('button', { name: /join now/i });
+        const joinButton = await screen.findByRole('button', { name: /join now/i });
         fireEvent.click(joinButton);
 
         // 3. Verify upper back navigation button has a valid descriptive aria-label
