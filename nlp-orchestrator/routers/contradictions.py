@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 from services.contradiction_detector import detect_contradictions
 
-
 router = APIRouter(prefix="/api/contradictions", tags=["Contradiction Detection"])
 
 REPORT_STORE: dict[str, dict] = {}

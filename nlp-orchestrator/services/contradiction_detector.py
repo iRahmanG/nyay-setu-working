@@ -2,9 +2,10 @@ import hashlib
 import re
 from typing import Any
 
-
 TIME_PATTERN = re.compile(
-    r"\b(?P<hour>1[0-2]|0?[1-9])(?::(?P<minute>[0-5][0-9]))?\s*(?P<period>a\.?m\.?|p\.?m\.?|AM|PM|am|pm)\b"
+    r"\b(?P<hour>1[0-2]|0?[1-9])"
+    r"(?::(?P<minute>[0-5][0-9]))?"
+    r"\s*(?P<period>a\.?m\.?|p\.?m\.?|AM|PM|am|pm)\b"
 )
 
 DATE_PATTERN = re.compile(
@@ -13,7 +14,8 @@ DATE_PATTERN = re.compile(
 )
 
 LOCATION_PATTERN = re.compile(
-    r"\b(?:at|near|inside|outside|in front of|around|beside)\s+([A-Z][A-Za-z0-9\s,.-]{2,80})",
+    r"\b(?:at|near|inside|outside|in front of|around|beside)"
+    r"\s+([A-Z][A-Za-z0-9\s,.-]{2,80})",
     re.IGNORECASE,
 )
 
@@ -22,7 +24,9 @@ def split_sentences(text: str) -> list[str]:
     cleaned = re.sub(r"\s+", " ", text or "").strip()
     if not cleaned:
         return []
-    return [item.strip() for item in re.split(r"(?<=[.!?])\s+", cleaned) if item.strip()]
+    return [
+        item.strip() for item in re.split(r"(?<=[.!?])\s+", cleaned) if item.strip()
+    ]
 
 
 def normalize_time(match: re.Match) -> str:
@@ -40,7 +44,9 @@ def normalize_time(match: re.Match) -> str:
 
 def normalize_location(value: str) -> str:
     value = re.sub(r"\s+", " ", value.strip())
-    value = re.sub(r"\b(on|at|when|where|while|and|but)\b.*$", "", value, flags=re.IGNORECASE)
+    value = re.sub(
+        r"\b(on|at|when|where|while|and|but)\b.*$", "", value, flags=re.IGNORECASE
+    )
     return value.strip(" ,.-").lower()
 
 
@@ -58,46 +64,54 @@ def extract_claims(document: dict[str, Any]) -> list[dict[str, Any]]:
 
     for sentence in split_sentences(text):
         for match in TIME_PATTERN.finditer(sentence):
-            claims.append({
-                "field": "time",
-                "value": match.group(0),
-                "normalized_value": normalize_time(match),
-                "sentence": sentence,
-                "document_id": document_id,
-                "document_name": document_name,
-                "document_type": document_type,
-            })
+            claims.append(
+                {
+                    "field": "time",
+                    "value": match.group(0),
+                    "normalized_value": normalize_time(match),
+                    "sentence": sentence,
+                    "document_id": document_id,
+                    "document_name": document_name,
+                    "document_type": document_type,
+                }
+            )
 
         for match in DATE_PATTERN.finditer(sentence):
             value = match.group(1)
-            claims.append({
-                "field": "date",
-                "value": value,
-                "normalized_value": value.lower(),
-                "sentence": sentence,
-                "document_id": document_id,
-                "document_name": document_name,
-                "document_type": document_type,
-            })
+            claims.append(
+                {
+                    "field": "date",
+                    "value": value,
+                    "normalized_value": value.lower(),
+                    "sentence": sentence,
+                    "document_id": document_id,
+                    "document_name": document_name,
+                    "document_type": document_type,
+                }
+            )
 
         for match in LOCATION_PATTERN.finditer(sentence):
             value = match.group(1)
             normalized = normalize_location(value)
             if normalized:
-                claims.append({
-                    "field": "location",
-                    "value": value.strip(),
-                    "normalized_value": normalized,
-                    "sentence": sentence,
-                    "document_id": document_id,
-                    "document_name": document_name,
-                    "document_type": document_type,
-                })
+                claims.append(
+                    {
+                        "field": "location",
+                        "value": value.strip(),
+                        "normalized_value": normalized,
+                        "sentence": sentence,
+                        "document_id": document_id,
+                        "document_name": document_name,
+                        "document_type": document_type,
+                    }
+                )
 
     return claims
 
 
-def build_contradiction(claim_a: dict[str, Any], claim_b: dict[str, Any]) -> dict[str, Any]:
+def build_contradiction(
+    claim_a: dict[str, Any], claim_b: dict[str, Any]
+) -> dict[str, Any]:
     field = claim_a["field"]
 
     severity = "High" if field in {"time", "date"} else "Medium"
@@ -139,7 +153,9 @@ def build_contradiction(claim_a: dict[str, Any], claim_b: dict[str, Any]) -> dic
     }
 
 
-def detect_contradictions(documents: list[dict[str, Any]], case_id: str | None = None) -> dict[str, Any]:
+def detect_contradictions(
+    documents: list[dict[str, Any]], case_id: str | None = None
+) -> dict[str, Any]:
     claims: list[dict[str, Any]] = []
 
     for document in documents:
@@ -149,7 +165,7 @@ def detect_contradictions(documents: list[dict[str, Any]], case_id: str | None =
     seen: set[str] = set()
 
     for index, claim_a in enumerate(claims):
-        for claim_b in claims[index + 1:]:
+        for claim_b in claims[index + 1 :]:
             if claim_a["document_id"] == claim_b["document_id"]:
                 continue
 
@@ -171,7 +187,9 @@ def detect_contradictions(documents: list[dict[str, Any]], case_id: str | None =
         "Low": sum(1 for item in contradictions if item["severity"] == "Low"),
     }
 
-    report_id = make_id(case_id or "adhoc", str(len(documents)), str(len(contradictions)))
+    report_id = make_id(
+        case_id or "adhoc", str(len(documents)), str(len(contradictions))
+    )
 
     return {
         "report_id": report_id,

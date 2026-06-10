@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 
 from routers.contradictions import router as contradictions_router
 
-
 app = FastAPI()
 app.include_router(contradictions_router)
 
@@ -41,8 +40,13 @@ def test_contradiction_analyze_endpoint_and_status_update():
     report_id = body["report_id"]
     contradiction_id = body["contradictions"][0]["id"]
 
+    status_url = (
+        f"/api/contradictions/reports/{report_id}"
+        f"/contradictions/{contradiction_id}/status"
+    )
+
     update_response = client.patch(
-        f"/api/contradictions/reports/{report_id}/contradictions/{contradiction_id}/status",
+        status_url,
         json={"status": "confirmed"},
     )
 
